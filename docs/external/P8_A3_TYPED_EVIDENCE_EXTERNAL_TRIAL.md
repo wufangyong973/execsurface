@@ -29,6 +29,14 @@ For the cleanest independence record:
 
 A failed build, unsupported environment, ERROR, incomplete result, verifier rejection or no-fit result is useful evidence.
 
+## Security notice — historical trial packet revisions
+
+The original packet revision referenced in Issue #157 has a confirmed **public CI log privacy gap**: child-process stdout/stderr from the experimental `observe` stage may escape into shared runner logs before evaluator review. This is distinct from the reported technical trial outcome; the historical result and its initial qualification remain unchanged.
+
+**Do not run that original revision with sensitive workloads in public CI.** Upgrade to a separately qualified harness revision with quiet build/doctor/observe stages before using a shared CI runner. Run any older pinned packet only in a private environment with separately reviewed log handling. Re-running is not a substitute for the original independent result, and should be declared a follow-up.
+
+The repaired harness deliberately sends child stdout/stderr to a discard sink rather than retaining them in logs or artifacts; bounded diagnostics retain stage and exit status. For detailed compiler or observer diagnostics, reproduce privately in a controlled environment. The raw typed-evidence artifact can still contain paths and must be inspected prior to external sharing. See [privacy defect and independent reporter](https://github.com/AETHERXGLOBAL/execsurface/issues/164) for the original report, verification and test gate.
+
 ## Privacy boundary
 
 The capture harness deliberately does **not** save:
