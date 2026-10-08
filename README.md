@@ -172,9 +172,17 @@ The baseline answers what canonical execution surface was accepted. The policy a
 
 ExecSurface v1.0.0 completed the repository's strengthened internal stable-release qualification for the documented Linux x86_64 + native `ptrace` boundary. The release chain proved exact source/tag identity, checksum and provenance, zero-contact public binary consumption, immutable-tag installation, stable `@v1` PASS/REVIEW/BLOCK/ERROR behavior, and exact crates.io installation. Independent external validation is not claimed. See **[Current Status](docs/STATUS.md)** for exact run IDs and limitations.
 
-Independent external validation remains open as additional evidence rather than a blocker to this bounded supported-Alpha state. Use [Self-Service Start](docs/SELF_SERVICE_START.md), [Five-Minute Start](docs/QUICKSTART_5_MIN.md), [Independent Evaluation](docs/INDEPENDENT_EVALUATION.md), and [Technical Evaluation Pack](docs/TECHNICAL_EVALUATION.md).
+Independent external validation remains open as additional evidence rather than a blocker to this bounded stable-v1.0.0 state. Use [Self-Service Start](docs/SELF_SERVICE_START.md), [Five-Minute Start](docs/QUICKSTART_5_MIN.md), [Independent Evaluation](docs/INDEPENDENT_EVALUATION.md), and [Technical Evaluation Pack](docs/TECHNICAL_EVALUATION.md).
 
 External findings remain welcome through **[Issue #118 — Independent External Validation & Post-Release Review](https://github.com/AETHERXGLOBAL/execsurface/issues/118)**. Negative, partial, unsupported-environment, usability and performance-problem results are welcome. Internal qualification is not evidence of independent adoption or external validation.
+
+## Independent external static review — historical Alpha
+
+On **2026-09-27**, the maintainer of [awesome-ai-security-tools](https://github.com/scadastrangelove/awesome-ai-security-tools) independently inspected ExecSurface's **then-public Alpha** code/documentation and added it to the project's [WATCHLIST.md](https://github.com/scadastrangelove/awesome-ai-security-tools/blob/main/WATCHLIST.md) ([addition commit](https://github.com/scadastrangelove/awesome-ai-security-tools/commit/e0ec97f6f0b696d6a5ab0cb2158b8b4c1458c831)). [Original reviewer statement](https://github.com/scadastrangelove/awesome-ai-security-tools/issues/133#issuecomment-5857686313).
+
+**Scope of that review:** source/documentation inspection only — **the reviewer did not execute ExecSurface**. The reviewer independently identified meaningful caveats: the observed command executes before a BLOCK decision can prevent subsequent CI steps, evidence can contain sensitive paths or network destinations, and REVIEW may require explicit fail-on-review configuration. This watchlist inclusion is **not** an endorsement, security audit, external runtime validation, integration, customer adoption or a review of the later stable v1.0.0 release.
+
+Current v1 product behavior and validation must be assessed against the [v1.0.0 release](https://github.com/AETHERXGLOBAL/execsurface/releases/tag/v1.0.0), the [current status](docs/STATUS.md) and fresh independent trials. The historic review remains useful adverse/neutral evidence; it does not certify the current release.
 
 ## Selected external technical engagement
 
@@ -188,11 +196,11 @@ Selected public records:
 
 These records establish technical engagement and, where stated, external reproduction or acknowledgement of the underlying problem framing. They do **not** establish NVIDIA/OpenAI adoption, endorsement, integration or independent validation of ExecSurface.
 
-For the company-level evidence summary, see the **[AETHER X GLOBAL organization profile](https://github.com/AETHERXGLOBAL#selected-external-technical-impact)**.
+For the company-level evidence summary, see the **[AETHER X GLOBAL organization profile](https://github.com/AETHERXGLOBAL#selected-external-engineering-contributions)**.
 
 ## Distribution and verification
 
-The supported Alpha distribution surfaces are:
+The current stable v1 distribution surfaces are:
 
 - checksum-verified GitHub Release binary for Linux x86_64;
 - exact stable install `cargo install execsurface --version "=1.0.0" --locked` for Rust users;
