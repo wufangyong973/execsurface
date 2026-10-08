@@ -2,6 +2,8 @@
 
 ExecSurface prioritizes precision, reproducibility, explicit limitations, and evidence-preserving engineering.
 
+**Current supported public release:** `v1.0.0` within the documented Linux x86_64/native-`ptrace` contract. Older Alpha.5 contribution tasks and examples remain useful historical evidence, but they must not be presented as the current stable consumer path without a new exact-v1 run, public artifact verification and fresh CI.
+
 ## New to ExecSurface?
 
 Start with repository Issues labeled `good first issue` and `help wanted`.
@@ -16,7 +18,7 @@ Current newcomer-scoped entry points include:
 
 These tasks are intentionally bounded so contributors can improve usability and integrations without silently changing runtime semantics, evidence authority, support claims or release guarantees.
 
-Independent Alpha.5 evaluation and adversarial findings belong in [Issue #118](https://github.com/AETHERXGLOBAL/execsurface/issues/118). A contribution or self-test is valuable engineering work, but it is not automatically independent external validation.
+Independent Alpha.5 findings remain preserved in [Issue #118](https://github.com/AETHERXGLOBAL/execsurface/issues/118). Current real-workload post-v1 evidence is tracked in [Issue #140](https://github.com/AETHERXGLOBAL/execsurface/issues/140). A contribution or self-test is valuable engineering work, but is not automatically independent external validation or product adoption.
 
 ## Before opening a change
 
