@@ -104,7 +104,9 @@ The generated workflow uses the stable v1 Action channel:
 AETHERXGLOBAL/execsurface@v1
 ```
 
-Do not use `@main` as the normal consumer path. See the **[GitHub Action guide](docs/GITHUB_ACTION.md)**.
+For a copy-ready, least-privilege Rust consumer with independent target-success gating and external baseline/policy custody pins, use **[the stable-v1 GitHub Action example](examples/github-action-consumer-v1.yml)**. For non-Rust projects, adapt the target command and learn the baseline under the same wrapper.
+
+Do not use `@main` or historical `@v0.1` as the default for new consumers. See the **[GitHub Action guide](docs/GITHUB_ACTION.md)**.
 
 If the wrapped command's own success matters—for example `cargo test`, `pytest` or a build—keep that command as its own CI gate as well. In v1.0, target exit/signal remains report metadata and does not by itself change the ExecSurface drift verdict.
 
@@ -225,6 +227,7 @@ Key documents:
 - [Current Status](docs/STATUS.md)
 - [Five-Minute Start](docs/QUICKSTART_5_MIN.md)
 - [GitHub Action](docs/GITHUB_ACTION.md)
+- [Current v1 vs historical examples](examples/README.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Independent Evaluation](docs/INDEPENDENT_EVALUATION.md)
 - [Technical Evaluation Pack](docs/TECHNICAL_EVALUATION.md)
