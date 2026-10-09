@@ -1,5 +1,7 @@
 # ExecSurface Command Examples
 
+**Current supported release:** ExecSurface `v1.0.0` on Linux x86_64, including GitHub Action `AETHERXGLOBAL/execsurface@v1`. For a copy-ready CI example, see [Stable v1 Consumer](../examples/github-action-consumer-v1.yml) and [example selection](../examples/README.md). Historical Alpha.5 Python/pytest recipes are evidence replay examples, not current installation instructions.
+
 These are **illustrative command recipes**, not claims that ExecSurface has separately certified every ecosystem.
 
 ExecSurface observes a command on supported Linux x86_64. The project command itself remains your responsibility.

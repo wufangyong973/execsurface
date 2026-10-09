@@ -1,0 +1,62 @@
+# Copy to .github/workflows/execsurface.yml in a Rust consumer repository.
+# CURRENT SUPPORTED CHANNEL: AETHERXGLOBAL/execsurface@v1 (stable v1.x).
+# For an immutable version review, substitute @v1.0.0.
+# Docs: https://github.com/AETHERXGLOBAL/execsurface/blob/main/docs/GITHUB_ACTION.md
+#
+# Before enabling:
+# 1. Install and verify ExecSurface v1.0.0 (see the v1 quickstart).
+# 2. Review/create execsurface-policy.json and learn execsurface.lock.json
+#    using exactly: execsurface learn --output execsurface.lock.json -- /bin/bash -lc 'cargo test --locked'
+#    on a comparable Linux x86_64 environment. Review and commit both files.
+# 3. Set GitHub repository variables EXECSURFACE_BASELINE_DIGEST (from the
+#    reviewed baseline's baseline_digest) and EXECSURFACE_POLICY_SHA256
+#    ("sha256:" + SHA-256 of the *exact* reviewed policy bytes).
+#    Set these only from a trusted maintainer context, never from PR content.
+# 4. The first CI check may legitimately produce REVIEW when build/runner
+#    behavior differs from the environment whose baseline was approved.
+#    Investigate the difference; do not automatically relearn.
+#
+# NOTE: Stable-v1 ExecSurface PASS is a drift verdict, not proof that the
+# wrapped test command succeeded. The independent test step below is essential.
+name: ExecSurface v1 — Rust consumer
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-drift:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code without persisting credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify native test outcome independently
+        run: cargo test --locked
+
+      - name: Check approved execution surface with ExecSurface v1
+        id: execsurface
+        uses: AETHERXGLOBAL/execsurface@v1
+        with:
+          command: "cargo test --locked"
+          baseline: execsurface.lock.json
+          policy: execsurface-policy.json
+          expected-baseline-digest: ${{ vars.EXECSURFACE_BASELINE_DIGEST }}
+          expected-policy-sha256: ${{ vars.EXECSURFACE_POLICY_SHA256 }}
+          require-custody: "true"
+          fail-on-review: "true"
+          # Evidence can contain filesystem/network metadata: inspect before sharing.
+          upload-artifact: "false"
+
+      - name: Assert the explicit ExecSurface verdict
+        if: success()
+        shell: bash
+        env:
+          VERDICT: ${{ steps.execsurface.outputs.verdict }}
+          VERDICT_EXIT: ${{ steps.execsurface.outputs.exit-code }}
+        run: |
+          test "$VERDICT" = "pass"
+          test "$VERDICT_EXIT" = "0"

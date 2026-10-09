@@ -5,11 +5,13 @@ This directory separates **current public guidance** from **engineering evidence
 ## Current public product
 
 - [Current Status](STATUS.md) — authoritative public support, distribution and validation state.
-- [Production Readiness](PRODUCTION_READINESS.md) — P9 evidence contract and v1.0 qualification gates; not a claim that v1.0 is already authorized.
-- [Compatibility & Stability Contract](COMPATIBILITY.md) — P9.3 candidate v1 compatibility boundary and the executable evidence required before it may become stable.
+- [Production Readiness](PRODUCTION_READINESS.md) — retained P9 qualification contract and evidence supporting the published bounded v1.0.0 release.
+- [Compatibility & Stability Contract](COMPATIBILITY.md) — active stable-v1 compatibility boundary and its qualification evidence.
 - [Five-Minute Start](QUICKSTART_5_MIN.md) — shortest controlled PASS → REVIEW walkthrough.
 - [Self-Service Start](SELF_SERVICE_START.md) — installation and first-use path for independent users.
-- [GitHub Action](GITHUB_ACTION.md) — CI integration and stable Action usage.
+- [GitHub Action](GITHUB_ACTION.md) — current `@v1` CI integration and stable Action usage.
+- [Copy-ready stable v1 consumer](../examples/github-action-consumer-v1.yml) — least-privilege example with explicit custody pins and independent test-success gating.
+- [Current vs historical examples](../examples/README.md) — use v1 for new projects; preserve Alpha fixtures only for replay.
 - [Troubleshooting](TROUBLESHOOTING.md) — environment, ptrace and evidence-health diagnostics.
 - [Examples](EXAMPLES.md) — command-line usage examples.
 - [Why provenance is not the same as runtime behavioral integrity](WHY_RUNTIME_BEHAVIORAL_INTEGRITY.md) — shareable technical explanation of the problem ExecSurface addresses.
@@ -62,6 +64,6 @@ When documents from different dates appear to conflict, use this order for curre
 4. the latest release-specific document under `docs/releases/`;
 5. dated milestone/development/archive records for chronology and historical evidence only.
 
-ExecSurface Alpha.5 remains bounded to Linux x86_64. ARM64 is not claimed. Native ptrace remains the bounded public reference observer. Independent external validation is not claimed unless qualified external evidence is explicitly recorded.
+ExecSurface **v1.0.0** is the supported stable release for Linux x86_64 with native ptrace as the bounded public observer. Alpha.5/Alpha.6 are immutable historical releases, not recommended for new onboarding. ARM64 and independent external validation are not claimed without corresponding evidence.
 
 Security-sensitive findings must follow [`SECURITY.md`](../SECURITY.md) rather than public evidence channels.

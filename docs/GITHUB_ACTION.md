@@ -16,7 +16,16 @@ For maximum pinning after this release, use:
 AETHERXGLOBAL/execsurface@v1.0.0
 ```
 
-Do not use `@main` as the normal consumer path.
+Do not use `@main` or a historical Alpha channel as the normal consumer path.
+
+## Copy-ready current-v1 consumer workflow
+
+For a Rust repository, use the **[stable-v1 copy-ready workflow](../examples/github-action-consumer-v1.yml)**. It deliberately runs the target tests independently, then checks execution-surface drift with `@v1`, `require-custody: "true"`, fail-closed REVIEW and least-privilege permissions.
+
+Before adopting it, review and commit the policy and baseline, then configure the two **trusted repository variables** `EXECSURFACE_BASELINE_DIGEST` and `EXECSURFACE_POLICY_SHA256`. The values must come from trusted maintainer approval, not untrusted PR content. The baseline is learned using exactly the same `/bin/bash -lc` wrapper on a comparable Linux x86_64 environment; environmental differences may legitimately trigger REVIEW. Do not automatically rewrite the baseline to silence the result.
+
+The [v1 example qualification workflow](../.github/workflows/v1-consumer-example-smoke.yml) exercises the published `@v1` Action against PASS, REVIEW, BLOCK and ERROR with externally supplied custody pins. Its results are separate from the historic Alpha.5 Python/pytest example.
+
 
 ## Minimal workflow
 
@@ -114,4 +123,4 @@ ExecSurface does not require PR-comment write permission.
 
 A PASS means the recorded comparison and policy did not identify review/block execution-surface drift. It does not prove the target command succeeded, and it does not prove the program is safe.
 
-See [Current Status](STATUS.md) for the current Alpha scope and declared limitations.
+See [Current Status](STATUS.md) for the **stable v1.0.0 Linux x86_64/native-ptrace scope** and declared limitations. The old Alpha.5/Alpha.6 releases remain historical evidence, not current onboarding defaults.

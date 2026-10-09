@@ -1,0 +1,148 @@
+name: V1 Copy-Ready Consumer Qualification
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/v1-consumer-example-smoke.yml'
+      - 'examples/github-action-consumer-v1.yml'
+      - 'examples/README.md'
+      - 'docs/GITHUB_ACTION.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/v1-consumer-example-smoke.yml'
+      - 'examples/github-action-consumer-v1.yml'
+      - 'examples/README.md'
+      - 'docs/GITHUB_ACTION.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-v1-action:
+    name: Public v1 Action / signed-custody verdict matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out consumer repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Obtain published immutable v1.0.0 binary and verify checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=v1.0.0
+          target=x86_64-unknown-linux-gnu
+          asset="execsurface-${tag}-${target}.tar.gz"
+          mkdir -p "$RUNNER_TEMP/v1-consumer-bin"
+          cd "$RUNNER_TEMP/v1-consumer-bin"
+          curl --fail --location --retry 3 --silent --show-error -O "https://github.com/AETHERXGLOBAL/execsurface/releases/download/${tag}/${asset}"
+          curl --fail --location --retry 3 --silent --show-error -O "https://github.com/AETHERXGLOBAL/execsurface/releases/download/${tag}/${asset}.sha256"
+          sha256sum -c "${asset}.sha256"
+          tar -xzf "$asset"
+          binary="$PWD/execsurface-${tag}-${target}/execsurface"
+          test "$("$binary" --version)" = "execsurface 1.0.0"
+          echo "EXECSURFACE_V1_BIN=$binary" >> "$GITHUB_ENV"
+
+      - name: Prepare explicitly pinned baseline and policy
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$EXECSURFACE_V1_BIN" doctor
+          "$EXECSURFACE_V1_BIN" learn --output v1-consumer-baseline.json -- /bin/bash -lc true
+          python3 - <<'PY'
+          import json, os
+          value = json.load(open("v1-consumer-baseline.json"))["baseline_digest"]
+          if not (isinstance(value, str) and value.startswith("sha256:") and len(value) == 71):
+              raise SystemExit("untrusted/malformed baseline digest")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              print("baseline_digest=" + value, file=output)
+          PY
+          printf '{"schema_version":2,"default_action":"review","rules":[]}\n' > v1-consumer-policy.json
+          printf '{"schema_version":2,"default_action":"review","rules":[{"id":"deny-added-exec","action":"block","match":{"change":"added","effect":"process_exec"}}]}\n' > v1-consumer-block-policy.json
+          echo "policy_digest=sha256:$(sha256sum v1-consumer-policy.json | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          echo "block_policy_digest=sha256:$(sha256sum v1-consumer-block-policy.json | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+          sha256sum v1-consumer-baseline.json > "$RUNNER_TEMP/v1-baseline.sha256"
+
+      - name: Stable v1 Action PASS
+        uses: AETHERXGLOBAL/execsurface@v1
+        id: pass
+        with:
+          command: "true"
+          baseline: v1-consumer-baseline.json
+          policy: v1-consumer-policy.json
+          expected-baseline-digest: ${{ steps.prepare.outputs.baseline_digest }}
+          expected-policy-sha256: ${{ steps.prepare.outputs.policy_digest }}
+          require-custody: "true"
+          fail-on-review: "true"
+          upload-artifact: "false"
+
+      - name: Stable v1 Action REVIEW — accepted only as explicitly configured
+        uses: AETHERXGLOBAL/execsurface@v1
+        id: review
+        with:
+          command: "true; /bin/echo controlled-drift >/dev/null"
+          baseline: v1-consumer-baseline.json
+          policy: v1-consumer-policy.json
+          expected-baseline-digest: ${{ steps.prepare.outputs.baseline_digest }}
+          expected-policy-sha256: ${{ steps.prepare.outputs.policy_digest }}
+          require-custody: "true"
+          fail-on-review: "false"
+          upload-artifact: "false"
+
+      - name: Stable v1 Action BLOCK — fail closed
+        uses: AETHERXGLOBAL/execsurface@v1
+        id: block
+        continue-on-error: true
+        with:
+          command: "true; /bin/echo controlled-block >/dev/null"
+          baseline: v1-consumer-baseline.json
+          policy: v1-consumer-block-policy.json
+          expected-baseline-digest: ${{ steps.prepare.outputs.baseline_digest }}
+          expected-policy-sha256: ${{ steps.prepare.outputs.block_policy_digest }}
+          require-custody: "true"
+          upload-artifact: "false"
+
+      - name: Stable v1 Action ERROR — fail closed on missing baseline
+        uses: AETHERXGLOBAL/execsurface@v1
+        id: error
+        continue-on-error: true
+        with:
+          command: "true"
+          baseline: missing-v1-consumer-baseline.json
+          policy: v1-consumer-policy.json
+          expected-baseline-digest: ${{ steps.prepare.outputs.baseline_digest }}
+          expected-policy-sha256: ${{ steps.prepare.outputs.policy_digest }}
+          require-custody: "true"
+          upload-artifact: "false"
+
+      - name: Assert verdicts and baseline immutability
+        shell: bash
+        env:
+          PASS_VERDICT: ${{ steps.pass.outputs.verdict }}
+          PASS_EXIT: ${{ steps.pass.outputs.exit-code }}
+          REVIEW_VERDICT: ${{ steps.review.outputs.verdict }}
+          REVIEW_EXIT: ${{ steps.review.outputs.exit-code }}
+          BLOCK_VERDICT: ${{ steps.block.outputs.verdict }}
+          BLOCK_EXIT: ${{ steps.block.outputs.exit-code }}
+          BLOCK_OUTCOME: ${{ steps.block.outcome }}
+          ERROR_VERDICT: ${{ steps.error.outputs.verdict }}
+          ERROR_EXIT: ${{ steps.error.outputs.exit-code }}
+          ERROR_OUTCOME: ${{ steps.error.outcome }}
+        run: |
+          set -euo pipefail
+          test "$PASS_VERDICT" = "pass"
+          test "$PASS_EXIT" = "0"
+          test "$REVIEW_VERDICT" = "review"
+          test "$REVIEW_EXIT" = "10"
+          test "$BLOCK_VERDICT" = "block"
+          test "$BLOCK_EXIT" = "20"
+          test "$BLOCK_OUTCOME" = "failure"
+          test "$ERROR_VERDICT" = "error"
+          test "$ERROR_EXIT" = "2"
+          test "$ERROR_OUTCOME" = "failure"
+          sha256sum -c "$RUNNER_TEMP/v1-baseline.sha256"
